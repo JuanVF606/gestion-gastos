@@ -36,7 +36,8 @@ DJANGO_APPS = [
 PROJECT_APPS = [
     'apps.user',  # user account
     'apps.category',  # category
-    'apps.gastos',  # gastos
+    'apps.gastos',  # gastos,
+    'apps.userprofile', # profile
    
 ]
 
@@ -181,6 +182,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
 }
 #Simple JWT
 SIMPLE_JWT = {

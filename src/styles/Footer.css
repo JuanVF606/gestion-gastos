@@ -1,0 +1,12 @@
+/* src/styles/Footer.css */
+.footer-link {
+  @apply text-white no-underline transition duration-300;
+}
+
+.footer-link:hover {
+  @apply text-finance-primary;
+}
+
+.bg-finance-secondary {
+  background-color: #718096; /* Color secundario */
+}

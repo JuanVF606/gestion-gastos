@@ -1,0 +1,26 @@
+/* src/styles/Sidebar.css */
+.sidebar {
+  @apply fixed top-0 left-0 h-full w-64 transform -translate-x-full transition-transform duration-300;
+  z-index: 50;
+}
+
+.sidebar.open {
+  @apply translate-x-0;
+}
+
+.sidebar-content {
+  @apply flex flex-col items-start mt-16 space-y-6;
+  padding: 1rem;
+}
+
+.sidebar-link {
+  @apply text-white no-underline font-medium transition duration-300 px-3 py-2 rounded-finance-sm w-full;
+}
+
+.sidebar-link:hover {
+  @apply text-finance-primary bg-white;
+}
+
+.toggle-btn {
+  @apply absolute top-4 right-4 text-white text-3xl cursor-pointer;
+}

@@ -1,25 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
-
+import { Provider, useDispatch, useSelector } from 'react-redux';
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./Routes/Routes.js";
+import "./App.css";
+import store from "./store.js";
+import { check_authenticated } from "./redux/actions/auth/auth.js";
+import { useEffect } from "react";
+import { IncomeExpenseProvider } from './components/context/IncomeExpenseContext.jsx';
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Provider store={store}>
+      <BrowserRouter>
+        <IncomeExpenseProvider>
+        <AppContent />
+
+        </IncomeExpenseProvider>
+      </BrowserRouter>
+    </Provider>
   );
 }
+
+const AppContent = () => {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+
+  useEffect(() => {
+    // Verifica si el usuario está autenticado al montar el componente
+    dispatch(check_authenticated());
+  }, [dispatch]);
+
+  return <AppRoutes isAuthenticated={isAuthenticated} />;
+};
+
 
 export default App;
