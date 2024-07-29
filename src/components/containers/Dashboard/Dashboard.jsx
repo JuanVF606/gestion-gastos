@@ -75,7 +75,7 @@ const Dashboard = () => {
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Panel de Resumen */}
-      <Link to="/intranet/gastos">
+      <Link to="/gastgo">
         <button className="bg-blue-500 text-white py-2 px-4 rounded-lg mb-6">
           Definir Ingresos y Gastos
         </button>

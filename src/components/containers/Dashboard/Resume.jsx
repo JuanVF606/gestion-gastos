@@ -1,60 +1,69 @@
-import React from 'react';
-import { useSpring, animated } from '@react-spring/web';
-import { FaDollarSign, FaArrowDown, FaBalanceScale } from 'react-icons/fa';
-import { useIncomeExpense } from '../../context/IncomeExpenseContext';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchData } from '../../../redux/actions/payments/payments';
+import { FaListAlt, FaDollarSign } from 'react-icons/fa';
 
 const Resume = () => {
-  const { income, expenses, balance } = useIncomeExpense();
+  const dispatch = useDispatch();
+  const { data, error } = useSelector((state) => state);
+  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
 
-  const numberIncomeProps = useSpring({
-    from: { number: 0 },
-    number: income,
-    config: { duration: 1000 },
-    reset: true,
-  });
+  useEffect(() => {
+    dispatch(fetchData());
+  }, [dispatch]);
 
-  const numberExpensesProps = useSpring({
-    from: { number: 0 },
-    number: expenses,
-    config: { duration: 1000 },
-    reset: true,
-  });
+  if (error) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+        <h2 className="text-xl font-semibold text-gray-800">Resumen</h2>
+        <p className="text-gray-500">Hubo un error al cargar los datos.</p>
+      </div>
+    );
+  }
 
-  const numberBalanceProps = useSpring({
-    from: { number: 0 },
-    number: balance,
-    config: { duration: 1000 },
-    reset: true,
-  });
+  if (!data[currentMonth]) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+        <h2 className="text-xl font-semibold text-gray-800">Resumen</h2>
+        <p className="text-gray-500">No hay datos disponibles para el mes actual.</p>
+      </div>
+    );
+  }
 
-  const renderAnimatedNumber = (props) => (
-    <animated.p className="text-2xl font-bold text-gray-900">
-      {props.number.to(n => `CLP ${n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`)}
-    </animated.p>
-  );
+  const { income, expenses, types } = data[currentMonth];
+  const totalExpenses = Object.values(expenses).reduce((acc, val) => acc + val, 0);
+  const balance = income - totalExpenses;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div className="bg-white p-4 rounded-lg shadow-lg flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800">Total de Ingresos</h3>
-          {renderAnimatedNumber(numberIncomeProps)}
+    <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Resumen del Mes de {currentMonth}</h2>
+      <div className="mb-4">
+        <div className="flex items-center mb-2">
+          <FaDollarSign className="mr-2 text-gray-500" />
+          <span className="text-lg font-semibold text-gray-800">Ingreso Total:</span>
         </div>
-        <FaDollarSign className="w-12 h-12 text-green-500" />
+        <p className="text-xl font-bold text-gray-900">{income.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.')} CLP</p>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow-lg flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800">Total de Gastos</h3>
-          {renderAnimatedNumber(numberExpensesProps)}
+      <div className="mb-4">
+        <div className="flex items-center mb-2">
+          <FaListAlt className="mr-2 text-gray-500" />
+          <span className="text-lg font-semibold text-gray-800">Gastos Totales:</span>
         </div>
-        <FaArrowDown className="w-12 h-12 text-red-500" />
+        <ul className="list-disc list-inside">
+          {Object.keys(expenses).map((key, index) => (
+            <li key={index} className="flex justify-between items-center mb-2">
+              <span>{key} ({types[key]})</span>
+              <span>{expenses[key].toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.')} CLP</span>
+            </li>
+          ))}
+        </ul>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow-lg flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800">Saldo Actual</h3>
-          {renderAnimatedNumber(numberBalanceProps)}
+      <div className="border-t border-gray-200 pt-4">
+        <div className="flex items-center mb-2">
+          <FaDollarSign className="mr-2 text-gray-500" />
+          <span className="text-lg font-semibold text-gray-800">Saldo Disponible:</span>
         </div>
-        <FaBalanceScale className="w-12 h-12 text-blue-500" />
+        <p className="text-xl font-bold text-gray-900">{balance.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.')} CLP</p>
       </div>
     </div>
   );

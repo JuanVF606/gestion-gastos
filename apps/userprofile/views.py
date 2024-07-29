@@ -13,6 +13,5 @@ class ProfileDetailJsonView(APIView):
         
         # Serializar los datos del perfil
         serializer = ProfileSerializer(profile)
-        
         # Devolver la respuesta en formato JSON
         return Response(serializer.data)

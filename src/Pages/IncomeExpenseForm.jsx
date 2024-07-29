@@ -1,178 +1,219 @@
-import React, { useState, useEffect } from "react";
-import { useIncomeExpense } from "../components/context/IncomeExpenseContext";
-import Layout from "../components/containers/Layouts/Layout";
-import { FaCalendarAlt, FaDollarSign, FaPlus, FaListAlt, FaTag } from "react-icons/fa";
+import React from 'react';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import Select from 'react-select';
+import { FaPlus, FaTrash } from 'react-icons/fa';
+import { NumericFormat } from 'react-number-format';
+import Layout from '../components/containers/Layouts/Layout';
+import { createPresupuesto } from '../components/services/api'; // Solo importamos las funciones necesarias
+import { categorias, tiposGasto } from '../components/common/Categorias';
 
 const IncomeExpenseForm = () => {
-  const currentMonth = new Date().toISOString().slice(0, 7); // Obtiene el mes actual en formato YYYY-MM
-  const [month, setMonth] = useState(currentMonth);
-  const [income, setIncome] = useState("");
-  const [expenses, setExpenses] = useState([]);
-  const [expenseName, setExpenseName] = useState("");
-  const [expenseAmount, setExpenseAmount] = useState("");
-  const [expenseType, setExpenseType] = useState("variable");
-  const [expenseCategory, setExpenseCategory] = useState("");
-  const { updateData } = useIncomeExpense();
+    const { register, handleSubmit, control, setValue, watch } = useForm({
+        defaultValues: {
+            monto_total: 0,
+            fecha_inicio: new Date().toISOString().split('T')[0],
+            fecha_fin: new Date().toISOString().split('T')[0],
+            descripcion: '',
+            detalles: [{ categoria: '', tipo_gasto: '', descripcion: '', monto: '', fecha: new Date().toISOString().split('T')[0], tiene_fecha_limite: false, fecha_limite: '' }]
+        }
+    });
 
-  const expenseCategories = [
-    "Alquiler", "Servicios", "Alimentos", "Transporte", "Salud", "Educación", "Entretenimiento", "Otros"
-  ];
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: 'detalles'
+    });
 
-  useEffect(() => {
-    // Set the month to the current month when the component mounts
-    setMonth(currentMonth);
-  }, [currentMonth]);
+    const onSubmit = data => {
+        createPresupuesto(data)
+            .then(response => {
+                console.log('Presupuesto creado:', response);
+                // Resetea el formulario si es necesario
+            })
+            .catch(error => console.error('Error creating presupuesto:', error));
+    };
 
-  const handleAddExpense = () => {
-    if (!expenseName || isNaN(parseFloat(expenseAmount))) {
-      alert("Por favor, complete el nombre y el monto del gasto.");
-      return;
-    }
-    setExpenses([
-      ...expenses,
-      { name: expenseName, amount: parseFloat(expenseAmount), type: expenseType, category: expenseCategory }
-    ]);
-    // Reset expense form
-    setExpenseName("");
-    setExpenseAmount("");
-    setExpenseCategory("");
-  };
+    const handleCategoriaChange = (selectedOption, index) => {
+        setValue(`detalles.${index}.categoria`, selectedOption.value);
+        setValue(`detalles.${index}.tipo_gasto`, ''); // Resetea tipo de gasto al cambiar la categoría
+    };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!month || isNaN(parseFloat(income))) {
-      alert("Por favor, complete el mes y el ingreso.");
-      return;
-    }
-    
-    const expense = expenses.reduce((acc, exp) => {
-      acc[exp.name] = exp.amount;
-      return acc;
-    }, {});
-    
-    const type = expenses.reduce((acc, exp) => {
-      acc[exp.name] = exp.type;
-      return acc;
-    }, {});
-    
-    updateData(month, parseFloat(income), expense, type);
-    
-    // Reset form
-    setMonth(currentMonth); // Reset month to current
-    setIncome("");
-    setExpenses([]);
-    alert("Datos actualizados correctamente.");
-  };
+    return (
+        <Layout>
+            <form onSubmit={handleSubmit(onSubmit)} className="p-4 md:p-6 lg:p-8 space-y-6 max-w-3xl mx-auto">
+                {/* Fila para Monto Total y Fechas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Monto Total</label>
+                        <Controller
+                            name="monto_total"
+                            control={control}
+                            render={({ field }) => (
+                                <NumericFormat
+                                    {...field}
+                                    thousandSeparator="."
+                                    decimalSeparator=","
+                                    prefix="$"
+                                    decimalScale={0}
+                                    fixedDecimalScale={false}
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    allowNegative={false}
+                                />
+                            )}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
+                        <input
+                            type="date"
+                            {...register('fecha_inicio')}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
+                        <input
+                            type="date"
+                            {...register('fecha_fin')}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                    </div>
+                </div>
 
-  return (
-    <Layout>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg space-y-6">
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2 flex items-center">
-            <FaCalendarAlt className="mr-2 text-gray-500" />
-            Mes
-          </label>
-          <input
-            type="month"
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-            className="border rounded-lg py-2 px-4 w-full"
-            placeholder="Seleccione el mes"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2 flex items-center">
-            <FaDollarSign className="mr-2 text-gray-500" />
-            Ingreso (CLP)
-          </label>
-          <input
-            type="number"
-            value={income}
-            onChange={(e) => setIncome(e.target.value)}
-            className="border rounded-lg py-2 px-4 w-full"
-            placeholder="Ingrese sus ingresos"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2 flex items-center">
-            <FaListAlt className="mr-2 text-gray-500" />
-            Gastos
-          </label>
-          <div className="flex flex-col gap-4">
-            <div className="flex gap-4 items-center">
-              <input
-                type="text"
-                value={expenseName}
-                onChange={(e) => setExpenseName(e.target.value)}
-                className="border rounded-lg py-2 px-4 w-full"
-                placeholder="Nombre del gasto"
-              />
-              <input
-                type="number"
-                value={expenseAmount}
-                onChange={(e) => setExpenseAmount(e.target.value)}
-                className="border rounded-lg py-2 px-4 w-full"
-                placeholder="Monto del gasto"
-              />
-              <select
-                value={expenseType}
-                onChange={(e) => setExpenseType(e.target.value)}
-                className="border rounded-lg py-2 px-4 w-full"
-              >
-                <option value="variable">Variable</option>
-                <option value="fijo">Fijo</option>
-              </select>
-              <select
-                value={expenseCategory}
-                onChange={(e) => setExpenseCategory(e.target.value)}
-                className="border rounded-lg py-2 px-4 w-full"
-              >
-                <option value="">Categoría</option>
-                {expenseCategories.map((category, index) => (
-                  <option key={index} value={category}>{category}</option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={handleAddExpense}
-                className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 flex items-center"
-              >
-                <FaPlus className="mr-2" />
-                Agregar Gasto
-              </button>
-            </div>
-            {expenses.length > 0 && (
-              <div className="bg-gray-100 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
-                  <FaListAlt className="mr-2 text-gray-500" />
-                  Gastos Añadidos
-                </h3>
-                <ul className="list-disc list-inside">
-                  {expenses.map((expense, index) => (
-                    <li key={index} className="flex justify-between items-center mb-2">
-                      <span>{expense.name} ({expense.category})</span>
-                      <span>{expense.amount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.')} CLP</span>
-                      <span className={`text-sm ${expense.type === 'fijo' ? 'text-green-500' : 'text-blue-500'}`}>
-                        {expense.type === 'fijo' ? 'Fijo' : 'Variable'}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 flex items-center"
-        >
-          <FaDollarSign className="mr-2" />
-          Guardar Presupuesto
-        </button>
-      </form>
-    </Layout>
-  );
+                {/* Descripción */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                    <textarea
+                        {...register('descripcion')}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                {/* Detalles de Gasto */}
+                <div className="mb-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Detalles de Gasto</h3>
+                    {fields.map((item, index) => (
+                        <div key={item.id} className="mb-4 border p-4 rounded-md bg-white shadow-sm">
+                            <div className="flex items-center space-x-4 mb-4">
+                                <button
+                                    type="button"
+                                    onClick={() => remove(index)}
+                                    className="text-red-500 hover:text-red-700"
+                                >
+                                    <FaTrash />
+                                </button>
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                                    <Controller
+                                        name={`detalles.${index}.categoria`}
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Select
+                                                {...field}
+                                                options={categorias}
+                                                onChange={option => handleCategoriaChange(option, index)}
+                                                placeholder="Selecciona una categoría"
+                                                className="w-full"
+                                            />
+                                        )}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Gasto</label>
+                                <Controller
+                                    name={`detalles.${index}.tipo_gasto`}
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            {...field}
+                                            options={tiposGasto[watch(`detalles.${index}.categoria`)] || []}
+                                            placeholder="Selecciona un tipo de gasto"
+                                            className="w-full"
+                                        />
+                                    )}
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                                <input
+                                    type="text"
+                                    {...register(`detalles.${index}.descripcion`)}
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Monto</label>
+                                <Controller
+                                    name={`detalles.${index}.monto`}
+                                    control={control}
+                                    render={({ field }) => (
+                                        <NumericFormat
+                                            {...field}
+                                            thousandSeparator="."
+                                            decimalSeparator=","
+                                            prefix="$"
+                                            decimalScale={2}
+                                            fixedDecimalScale={false}
+                                            className="w-full p-2 border border-gray-300 rounded-md"
+                                            allowNegative={false}
+                                        />
+                                    )}
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                                <input
+                                    type="date"
+                                    {...register(`detalles.${index}.fecha`)}
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <input
+                                        type="checkbox"
+                                        {...register(`detalles.${index}.tiene_fecha_limite`)}
+                                    />
+                                    Tiene Fecha Límite
+                                </label>
+                            </div>
+
+                            {watch(`detalles.${index}.tiene_fecha_limite`) && (
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Límite</label>
+                                    <input
+                                        type="date"
+                                        {...register(`detalles.${index}.fecha_limite`)}
+                                        className="w-full p-2 border border-gray-300 rounded-md"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    ))}
+
+                    <button
+                        type="button"
+                        onClick={() => append({ categoria: '', tipo_gasto: '', descripcion: '', monto: '', fecha: new Date().toISOString().split('T')[0], tiene_fecha_limite: false, fecha_limite: '' })}
+                        className="text-blue-500 hover:text-blue-700"
+                    >
+                        <FaPlus /> Agregar Detalle
+                    </button>
+                </div>
+
+                <button
+                    type="submit"
+                    className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+                >
+                    Guardar Presupuesto
+                </button>
+            </form>
+        </Layout>
+    );
 };
 
 export default IncomeExpenseForm;

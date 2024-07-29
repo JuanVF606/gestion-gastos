@@ -1,15 +1,15 @@
-# Create your views here.
-from rest_framework import generics
-from .models import Gasto
-from .serializers import GastoSerializer
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework import viewsets
+from .models import Categoria, Presupuesto, DetalleGasto
+from .serializers import CategoriaSerializer, PresupuestoSerializer, DetalleGastoSerializer
 
-@csrf_exempt
-class GastoListAPIView(generics.ListCreateAPIView):
-    queryset = Gasto.objects.all()
-    serializer_class = GastoSerializer
+class CategoriaViewSet(viewsets.ModelViewSet):
+    queryset = Categoria.objects.all()
+    serializer_class = CategoriaSerializer
 
-@csrf_exempt
-class GastoDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Gasto.objects.all()
-    serializer_class = GastoSerializer
+class PresupuestoViewSet(viewsets.ModelViewSet):
+    queryset = Presupuesto.objects.all()
+    serializer_class = PresupuestoSerializer
+
+class DetalleGastoViewSet(viewsets.ModelViewSet):
+    queryset = DetalleGasto.objects.all()
+    serializer_class = DetalleGastoSerializer

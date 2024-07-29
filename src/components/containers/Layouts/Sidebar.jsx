@@ -5,7 +5,7 @@ import { FaHome, FaWallet, FaMoneyBillWave, FaChartLine, FaCogs, FaHeadset, FaBa
 import { useLocation, useNavigate } from 'react-router-dom';
 import { TbLogout2 } from "react-icons/tb";
 import UserProfile from '../../../assets/img/commons/UserProfile.jpg';
-const Sidebar = () => {
+const Sidebar = ({handleLogout}) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ const Sidebar = () => {
     { name: 'Configuración', icon: <FaCogs />, path: '/settings' },
     { name: 'Soporte', icon: <FaHeadset />, path: '/support' },
   ];
-
+  
   return (
     <>
       <button
@@ -61,7 +61,7 @@ const Sidebar = () => {
             </ul>
           </div>
         <div className="p-4 bg-gray-800 border-t border-gray-700">
-          <button className="flex items-center py-2 px-4 rounded-md bg-gray-700 hover:bg-gray-600 w-full">
+          <button className="flex items-center py-2 px-4 rounded-md bg-gray-700 hover:bg-gray-600 w-full" onClick={handleLogout}>
             <span className="text-xl mr-4"><TbLogout2 /></span>
             <span className="font-medium">Cerrar Sesión</span>
           </button>

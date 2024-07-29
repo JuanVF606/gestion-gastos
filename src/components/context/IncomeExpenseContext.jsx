@@ -1,51 +1,33 @@
-import React, { createContext, useState, useContext } from "react";
+// IncomeExpenseContext.js
+import React, { createContext, useState, useContext } from 'react';
 
 const IncomeExpenseContext = createContext();
 
+export const useIncomeExpense = () => useContext(IncomeExpenseContext);
+
 export const IncomeExpenseProvider = ({ children }) => {
   const [data, setData] = useState({});
+  const [monthsWithBudget, setMonthsWithBudget] = useState([]);
 
-  const updateData = (month, income, expense, type) => {
-    setData(prevData => ({
-      ...prevData,
-      [month]: {
-        income: (prevData[month]?.income || 0) + income,
-        expense: {
-          ...prevData[month]?.expense,
-          ...expense
-        },
-        type: {
-          ...prevData[month]?.type,
-          ...type
-        }
-      }
-    }));
-  };
-
-  const removeFixedExpense = (month) => {
+  const updateData = (month, income, expenses, types) => {
     setData(prevData => {
-      const { [month]: removed, ...rest } = prevData;
-      return rest;
+      const newData = {
+        ...prevData,
+        [month]: { income, expenses, types }
+      };
+      
+      // Update the list of months with budgets
+      if (!monthsWithBudget.includes(month)) {
+        setMonthsWithBudget([...monthsWithBudget, month]);
+      }
+      
+      return newData;
     });
   };
 
-  const calculateTotals = () => {
-    const totalIncome = Object.values(data).reduce((acc, item) => acc + item.income, 0);
-    const totalExpense = Object.values(data).reduce((acc, item) => {
-      return acc + Object.values(item.expense).reduce((subAcc, val) => subAcc + val, 0);
-    }, 0);
-    return {
-      income: totalIncome,
-      expenses: totalExpense,
-      balance: totalIncome - totalExpense
-    };
-  };
-
   return (
-    <IncomeExpenseContext.Provider value={{ ...calculateTotals(), data, updateData, removeFixedExpense }}>
+    <IncomeExpenseContext.Provider value={{ data, updateData, monthsWithBudget }}>
       {children}
     </IncomeExpenseContext.Provider>
   );
 };
-
-export const useIncomeExpense = () => useContext(IncomeExpenseContext);
