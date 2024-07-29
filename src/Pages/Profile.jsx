@@ -170,7 +170,7 @@ const UserProfile = () => {
               <p className="text-gray-700"><FaEnvelope className="inline mr-2" /> Correo Electrónico: {profile.email}</p>
               <p className="text-gray-700"><FaCalendar className="inline mr-2" /> Edad: {profile.age || 'No disponible'}</p>
               <p className="text-gray-700"><FaBriefcase className="inline mr-2" /> Profesión: {profile.profession || 'No disponible'}</p>
-              <p className="text-gray-700"><FaMoneyBillWave className="inline mr-2" /> Sueldo: CLP {profile.salary.toLocaleString() || 'No disponible'}</p>
+              <p className="text-gray-700"><FaMoneyBillWave className="inline mr-2" /> Sueldo: CLP {profile.salary || 'No disponible'}</p>
               <p className="text-gray-700"><FaBriefcase className="inline mr-2" /> Trabajo: {profile.work || 'No disponible'}</p>
               <p className="text-gray-700"><FaPhone className="inline mr-2" /> Teléfono: {profile.phone || 'No disponible'}</p>
             </div>
