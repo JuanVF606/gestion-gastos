@@ -4,7 +4,7 @@ import Select from 'react-select';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { NumericFormat } from 'react-number-format';
 import Layout from '../components/containers/Layouts/Layout';
-import { createPresupuesto } from '../components/services/api'; // Solo importamos las funciones necesarias
+import { createPresupuesto } from '../components/services/api';
 import { categorias, tiposGasto } from '../components/common/Categorias';
 
 const IncomeExpenseForm = () => {
@@ -33,13 +33,13 @@ const IncomeExpenseForm = () => {
     };
 
     const handleCategoriaChange = (selectedOption, index) => {
-        setValue(`detalles.${index}.categoria`, selectedOption.value);
+        setValue(`detalles.${index}.categoria`, selectedOption.value, { shouldValidate: true });
         setValue(`detalles.${index}.tipo_gasto`, ''); // Resetea tipo de gasto al cambiar la categoría
     };
 
     return (
         <Layout>
-            <form onSubmit={handleSubmit(onSubmit)} className="p-4 md:p-6 lg:p-8 space-y-6 max-w-3xl mx-auto">
+            <form onSubmit={handleSubmit(onSubmit)} className="p-6 bg-white shadow-lg rounded-lg space-y-6 max-w-4xl mx-auto">
                 {/* Fila para Monto Total y Fechas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
@@ -55,7 +55,7 @@ const IncomeExpenseForm = () => {
                                     prefix="$"
                                     decimalScale={0}
                                     fixedDecimalScale={false}
-                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     allowNegative={false}
                                 />
                             )}
@@ -66,7 +66,7 @@ const IncomeExpenseForm = () => {
                         <input
                             type="date"
                             {...register('fecha_inicio')}
-                            className="w-full p-2 border border-gray-300 rounded-md"
+                            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
                     <div>
@@ -74,7 +74,7 @@ const IncomeExpenseForm = () => {
                         <input
                             type="date"
                             {...register('fecha_fin')}
-                            className="w-full p-2 border border-gray-300 rounded-md"
+                            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
                 </div>
@@ -84,7 +84,8 @@ const IncomeExpenseForm = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
                     <textarea
                         {...register('descripcion')}
-                        className="w-full p-2 border border-gray-300 rounded-md"
+                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        rows="3"
                     />
                 </div>
 
@@ -92,7 +93,7 @@ const IncomeExpenseForm = () => {
                 <div className="mb-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Detalles de Gasto</h3>
                     {fields.map((item, index) => (
-                        <div key={item.id} className="mb-4 border p-4 rounded-md bg-white shadow-sm">
+                        <div key={item.id} className="mb-4 p-4 rounded-md bg-gray-50 shadow-inner">
                             <div className="flex items-center space-x-4 mb-4">
                                 <button
                                     type="button"
@@ -112,6 +113,7 @@ const IncomeExpenseForm = () => {
                                                 options={categorias}
                                                 onChange={option => handleCategoriaChange(option, index)}
                                                 placeholder="Selecciona una categoría"
+                                                value={categorias.find(c => c.value === field.value)}
                                                 className="w-full"
                                             />
                                         )}
@@ -140,7 +142,7 @@ const IncomeExpenseForm = () => {
                                 <input
                                     type="text"
                                     {...register(`detalles.${index}.descripcion`)}
-                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
 
@@ -157,7 +159,7 @@ const IncomeExpenseForm = () => {
                                             prefix="$"
                                             decimalScale={2}
                                             fixedDecimalScale={false}
-                                            className="w-full p-2 border border-gray-300 rounded-md"
+                                            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             allowNegative={false}
                                         />
                                     )}
@@ -169,15 +171,16 @@ const IncomeExpenseForm = () => {
                                 <input
                                     type="date"
                                     {...register(`detalles.${index}.fecha`)}
-                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1 items-center">
                                     <input
                                         type="checkbox"
                                         {...register(`detalles.${index}.tiene_fecha_limite`)}
+                                        className="mr-2"
                                     />
                                     Tiene Fecha Límite
                                 </label>
@@ -189,7 +192,7 @@ const IncomeExpenseForm = () => {
                                     <input
                                         type="date"
                                         {...register(`detalles.${index}.fecha_limite`)}
-                                        className="w-full p-2 border border-gray-300 rounded-md"
+                                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
                             )}
@@ -199,15 +202,15 @@ const IncomeExpenseForm = () => {
                     <button
                         type="button"
                         onClick={() => append({ categoria: '', tipo_gasto: '', descripcion: '', monto: '', fecha: new Date().toISOString().split('T')[0], tiene_fecha_limite: false, fecha_limite: '' })}
-                        className="text-blue-500 hover:text-blue-700"
+                        className="text-blue-500 hover:text-blue-700 flex items-center space-x-2 mt-4"
                     >
-                        <FaPlus /> Agregar Detalle
+                        <FaPlus /> <span>Agregar Detalle</span>
                     </button>
                 </div>
 
                 <button
                     type="submit"
-                    className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+                    className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
                 >
                     Guardar Presupuesto
                 </button>

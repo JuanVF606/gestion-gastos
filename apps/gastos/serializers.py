@@ -18,3 +18,9 @@ class PresupuestoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Presupuesto
         fields = ['id', 'usuario', 'categoria', 'monto_total', 'fecha_inicio', 'fecha_fin', 'tipo', 'descripcion', 'detalles']
+
+
+class PresupuestoPorMesSerializer(serializers.Serializer):
+    mes = serializers.CharField()
+    monto_total = serializers.FloatField()
+    detalles = DetalleGastoSerializer(many=True)

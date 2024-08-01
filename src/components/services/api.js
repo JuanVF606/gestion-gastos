@@ -6,31 +6,44 @@ const api = axios.create({
 });
 
 // Obtener categorías
-export const getCategorias = () => {
-    return api.get('categorias/')
-        .then(response => response.data)
-        .catch(error => {
-            console.error('Error fetching categories:', error);
-            throw error;
-        });
+export const getCategorias = async () => {
+    try {
+        const response = await api.get('categorias/');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+    }
 };
 
 // Obtener tipos de gasto
-export const getTiposGasto = () => {
-    return api.get('tipos-gasto/')
-        .then(response => response.data)
-        .catch(error => {
-            console.error('Error fetching types of expenses:', error);
-            throw error;
-        });
+export const getTiposGasto = async () => {
+    try {
+        const response = await api.get('tipos-gasto/');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching types of expenses:', error);
+        throw error;
+    }
 };
 
 // Crear presupuesto
-export const createPresupuesto = (data) => {
-    return api.post('presupuestos/', data)
-        .then(response => response.data)
-        .catch(error => {
-            console.error('Error creating presupuesto:', error);
-            throw error;
-        });
+export const createPresupuesto = async (data) => {
+    try {
+        const response = await api.post('presupuestos/', data);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating presupuesto:', error);
+        throw error;
+    }
+};
+
+export const getPresupuestoPorMes = async () => {
+    try {
+        const response = await api.get('presupuesto-mensual/');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching monthly budget:', error);
+        throw error;
+    }
 };
